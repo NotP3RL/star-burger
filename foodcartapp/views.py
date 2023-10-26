@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import JsonResponse
 from django.templatetags.static import static
 import json
@@ -59,27 +61,29 @@ def product_list_api(request):
 
 
 def register_order(request):
-    # TODO это лишь заглушка
     try:
-        data = json.loads(request.body.decode())
+        order_info = json.loads(request.body.decode())
+        offset = datetime.timedelta(hours=-8)
+        timezone = datetime.timezone(offset, name='UTC')
+        order_time = datetime.datetime.now(tz=timezone)
         Order.objects.create(
-            firstname=data['firstname'],
-            lastname=data['lastname'],
-            phonenumber=data['phonenumber'],
-            address=data['address']
+            firstname=order_info['firstname'],
+            lastname=order_info['lastname'],
+            phonenumber=order_info['phonenumber'],
+            address=order_info['address'],
+            time=order_time
         )
-        order = Order.objects.get(firstname=data['firstname'])
-        for product_data in data['products']:
-            product_id = product_data['product'] - 1
+        order = Order.objects.get(time=order_time)
+        for product_data in order_info['products']:
+            product_id = product_data['product']
             product = Product.objects.get(id=product_id)
             OrderItem.objects.create(
                 order=order,
                 product=product,
                 quantity=product_data['quantity']
             )
-        print(data)
         return JsonResponse({})
     except ValueError:
         return JsonResponse({
-            'error': 'bla bla bla',
+            'error': 'ValueError',
         })

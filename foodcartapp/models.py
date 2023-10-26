@@ -144,13 +144,17 @@ class Order(models.Model):
         verbose_name='адрес',
         db_index=True
     )
+    time = models.DateTimeField(
+        verbose_name='время',
+        db_index=True
+    )
 
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
 
     def __str__(self):
-        return f"{self.phonenumber} - {self.address}"
+        return f"{self.phonenumber} - {self.address} - {self.time}"
 
 
 class OrderItem(models.Model):
@@ -167,3 +171,10 @@ class OrderItem(models.Model):
         verbose_name='продукт'
     )
     quantity = models.IntegerField(verbose_name='количество')
+
+    class Meta:
+        verbose_name = 'предмет заказа'
+        verbose_name_plural = 'предметы заказов'
+
+    def __str__(self):
+        return f"{self.order} - {self.product} - {self.quantity} штуки"
