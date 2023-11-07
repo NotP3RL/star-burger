@@ -3,6 +3,7 @@ import datetime
 from django.http import JsonResponse
 from django.templatetags.static import static
 import json
+from rest_framework.decorators import api_view
 
 
 from .models import Product, Order, OrderItem
@@ -60,9 +61,10 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
     try:
-        order_info = json.loads(request.body.decode())
+        order_info = request.data
         offset = datetime.timedelta(hours=-8)
         timezone = datetime.timezone(offset, name='UTC')
         order_time = datetime.datetime.now(tz=timezone)
