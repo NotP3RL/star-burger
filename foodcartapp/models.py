@@ -136,6 +136,7 @@ class Order(models.Model):
         db_index=True
     )
     phonenumber = PhoneNumberField(
+        region='RU',
         verbose_name='номер телефона',
         db_index=True
     )
