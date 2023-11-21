@@ -3,8 +3,9 @@ import datetime
 from django.http import JsonResponse
 from django.templatetags.static import static
 import json
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
 
 from .models import Product, Order, OrderItem
 
@@ -65,26 +66,36 @@ def product_list_api(request):
 def register_order(request):
     try:
         order_info = request.data
-        offset = datetime.timedelta(hours=-8)
-        timezone = datetime.timezone(offset, name='UTC')
-        order_time = datetime.datetime.now(tz=timezone)
-        Order.objects.create(
-            firstname=order_info['firstname'],
-            lastname=order_info['lastname'],
-            phonenumber=order_info['phonenumber'],
-            address=order_info['address'],
-            time=order_time
-        )
-        order = Order.objects.get(time=order_time)
-        for product_data in order_info['products']:
-            product_id = product_data['product']
-            product = Product.objects.get(id=product_id)
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=product_data['quantity']
+        if not 'products' in order_info:
+            content = {'error': 'products key no present'}
+            return Response(content, status=status.HTTP_200_OK)
+        elif not order_info['products']:
+            content = {'error': 'products key cannot be null'}
+            return Response(content, status=status.HTTP_200_OK)
+        elif not isinstance(order_info['products'], list):
+            content = {'error': 'products key is not list'}
+            return Response(content, status=status.HTTP_200_OK)
+        else:
+            offset = datetime.timedelta(hours=-8)
+            timezone = datetime.timezone(offset, name='UTC')
+            order_time = datetime.datetime.now(tz=timezone)
+            Order.objects.create(
+                firstname=order_info['firstname'],
+                lastname=order_info['lastname'],
+                phonenumber=order_info['phonenumber'],
+                address=order_info['address'],
+                time=order_time
             )
-        return JsonResponse({})
+            order = Order.objects.get(time=order_time)
+            for product_data in order_info['products']:
+                product_id = product_data['product']
+                product = Product.objects.get(id=product_id)
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=product_data['quantity']
+                )
+            return JsonResponse({})
     except ValueError:
         return JsonResponse({
             'error': 'ValueError',
