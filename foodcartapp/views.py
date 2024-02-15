@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 from phonenumber_field.validators import validate_international_phonenumber
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Product, Order, OrderItem
 from .serializer import OrderSerializer
@@ -86,7 +87,7 @@ def register_order(request):
                 product=product,
                 quantity=product_data['quantity']
             )
-        return JsonResponse({})
+        return Response(serializer.data)
     except ValueError:
         return JsonResponse({
             'error': 'ValueError',
