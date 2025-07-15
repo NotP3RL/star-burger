@@ -5,6 +5,8 @@ from django.templatetags.static import static
 from phonenumber_field.validators import validate_international_phonenumber
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.db.models import Sum
+
 
 from .models import Product, Order, OrderItem
 from .serializer import OrderSerializer
@@ -82,10 +84,12 @@ def register_order(request):
         for product_data in request.data['products']:
             product_id = product_data['product']
             product = Product.objects.get(id=product_id)
+            price = product.price * product_data['quantity']
             OrderItem.objects.create(
                 order=order,
                 product=product,
-                quantity=product_data['quantity']
+                quantity=product_data['quantity'],
+                price=price
             )
         return Response(serializer.data)
     except ValueError:
